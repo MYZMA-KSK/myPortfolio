@@ -3,6 +3,7 @@ import { Montserrat, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PasswordGate from "@/components/PasswordGate";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -45,11 +46,13 @@ export default function RootLayout({
         className={`${montserrat.variable} ${notoSansJP.variable} antialiased bg-neutral-50 text-neutral-900`}
         suppressHydrationWarning
       >
-        <Header />
-        <main className="min-h-screen pt-16">
-          {children}
-        </main>
-        <Footer />
+        <PasswordGate>
+          <Header />
+          <main className="min-h-screen pt-16">
+            {children}
+          </main>
+          <Footer />
+        </PasswordGate>
       </body>
     </html>
   );
