@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "宮島敬右 | UI/UX Designer Portfolio",
   description: "UI/UXデザイナー宮島敬右のポートフォリオサイト。2004年から2022年にかけてのウェブサービス開発と電気機器業界でのUIデザイン作品を紹介。",
   keywords: ["UI/UX", "デザイナー", "ポートフォリオ", "宮島敬右"],
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
     title: "宮島敬右 | UI/UX Designer Portfolio",
     description: "UI/UXデザイナー宮島敬右のポートフォリオサイト",
