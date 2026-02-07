@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ProcessStep, ProcessPhase } from '@/data/projects';
 
@@ -74,6 +75,20 @@ export default function ProcessTimeline({ steps }: ProcessTimelineProps) {
                   <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors">
                     <h4 className="font-bold text-neutral-900 mb-2">{step.title}</h4>
                     <p className="text-sm text-neutral-600 leading-relaxed">{step.description}</p>
+                    {step.images && step.images.length > 0 && (
+                      <div className={`mt-4 grid gap-2 ${step.images.length === 1 ? 'grid-cols-1' : step.images.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
+                        {step.images.map((image, imgIndex) => (
+                          <div key={imgIndex} className="relative aspect-video bg-neutral-100 rounded overflow-hidden">
+                            <Image
+                              src={image}
+                              alt={`${step.title} - ${imgIndex + 1}`}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}

@@ -6,6 +6,7 @@ export interface ProcessStep {
   phase: ProcessPhase;
   title: string;
   description: string;
+  images?: string[];
 }
 
 export interface Project {
@@ -47,17 +48,23 @@ export const projects: Project[] = [
       'ZeplinとStorybookの連携によるハンドオフ改善',
       'Lottieによるモーショングラフィックの実装',
     ],
-    images: ['/images/projects/fastest-ui-main.jpg', '/images/projects/fastest-design-tokens.jpg', '/images/projects/fastest-design-system.jpg'],
+    images: [
+      '/images/projects/fastest-ui-main.jpg',
+      '/images/projects/img-002.jpg',
+      '/images/projects/img-001.jpg',
+      '/images/projects/img-004.jpg',
+      '/images/projects/img-000.jpg',
+    ],
     url: 'https://fastest.jp/',
     process: [
       { phase: '企画', title: 'ブランディングの開発', description: 'FasTestブランドの世界観を象徴するロゴタイプ・キービジュアルのデザインと、プロダクト全体のトーン&マナーを開発' },
-      { phase: '企画', title: 'デザイントークンの制定', description: 'カラー、タイポグラフィ、シャドウ、スペーシングなどのデザイントークンをFigmaで制定し、エンジニアとの共通言語を確立' },
-      { phase: '制作', title: 'デザインライブラリの構築', description: 'FigmaでAtomicコンポーネントとスタイルガイドを構築。ZeplinとStorybookの連携でハンドオフを改善' },
+      { phase: '企画', title: 'デザイントークンの制定', description: 'カラー、タイポグラフィ、シャドウ、スペーシングなどのデザイントークンをFigmaで制定し、エンジニアとの共通言語を確立', images: ['/images/projects/img-024.png', '/images/projects/img-034.jpg', '/images/projects/img-044.jpg'] },
+      { phase: '制作', title: 'デザインライブラリの構築', description: 'FigmaでAtomicコンポーネントとスタイルガイドを構築。ZeplinとStorybookの連携でハンドオフを改善', images: ['/images/projects/fastest-design-system.jpg'] },
       { phase: '制作', title: '情報設計とワイヤーフレームの作成', description: 'セールス部門にヒアリングを実施して、実現したい要求と完了させたいタスクを整理。Whimsicalを使用してワイヤーフレームと画面遷移を作成' },
       { phase: '制作', title: 'UIデザインの作成', description: 'デザインライブラリのコンポーネントを使用して、実際のイメージをモックアップレベルで作成。状況に応じた画面の変更パターンを作成' },
       { phase: '制作', title: 'プロトタイプの作成', description: '主要なタスクの開始から完了までの操作の流れをイメージできるプロトタイプをSketch/Figmaで作成' },
-      { phase: '制作', title: 'ヘルプマニュアルの制作', description: '東芝と並行して、PDFのヘルプマニュアルを制作。モックアップと変わらない実装が実現されることで操作に矛盾がないことを確認' },
-      { phase: '制作', title: 'ランディングページの制作', description: 'Adobe XDでプロモーション用のランディングページを制作。Adobe After EffectsとLottieの連携によるモーショングラフィックの書き出しにも対応' },
+      { phase: '制作', title: 'ヘルプマニュアルの制作', description: '実装と並行して、PDFのヘルプマニュアルを制作。モックアップと変わらない実装が実現されることで操作に矛盾がないことを確認', images: ['/images/projects/img-049.jpg', '/images/projects/img-053.jpg'] },
+      { phase: '制作', title: 'ランディングページの制作', description: 'Adobe XDでプロモーション用のランディングページを制作。Adobe After EffectsとLottieの連携によるモーショングラフィックの書き出しにも対応', images: ['/images/projects/img-016.jpg', '/images/projects/img-020.jpg'] },
     ],
   },
   {
@@ -81,14 +88,20 @@ export const projects: Project[] = [
       'Atomic Designに基づいたデザインライブラリの構築',
       '継続的なダッシュボード画面の改善',
     ],
-    images: ['/images/projects/sitest-main.jpg', '/images/projects/sitest-dashboard.jpg', '/images/projects/sitest-ui-components.jpg', '/images/projects/sitest-wireframes.jpg', '/images/projects/sitest-reports.jpg'],
+    images: [
+      '/images/projects/sitest-dashboard.jpg',
+      '/images/projects/img-082.jpg',
+      '/images/projects/img-077.jpg',
+      '/images/projects/img-079.jpg',
+      '/images/projects/img-076.jpg',
+    ],
     url: 'https://sitest.jp/',
     process: [
       { phase: '企画', title: '企画会議', description: '定期的に開催されるセールスチームと開発チームの企画会議に参加。ユーザーの要望とゴールをできる限り明らかにし、アイデアや改善策を提案' },
       { phase: '企画', title: 'リサーチ・競合調査', description: 'セールスチームからの要望に応じて、同じドメインの競合のプロダクト・サービスの公式サイトや有料コンテンツをチェックして、自社プロダクトに不足している機能や提供価値を調査' },
-      { phase: '制作', title: '情報設計', description: 'ユーザーストーリーマップのカードから「オブジェクト」と「プロパティ」を抽出。OOUIを念頭に置いて画面のレイアウトや遷移の様子を検討' },
+      { phase: '制作', title: '情報設計', description: 'ユーザーストーリーマップのカードから「オブジェクト」と「プロパティ」を抽出。OOUIを念頭に置いて画面のレイアウトや遷移の様子を検討', images: ['/images/projects/sitest-wireframes.jpg'] },
       { phase: '制作', title: 'ワイヤーフレームの作成', description: '複雑な画面を作成する場合は、画面を共有しながらWhimsicalを使用して、関係者とリアルタイムでワイヤーフレームを作成しながら合意形成を図る' },
-      { phase: '制作', title: 'UIデザインの作成', description: 'UIリニューアル時に作成したデザインライブラリのコンポーネントを最大限活用して、実際のイメージを伝えられる画面のレイアウトをSketchで作成' },
+      { phase: '制作', title: 'UIデザインの作成', description: 'UIリニューアル時に作成したデザインライブラリのコンポーネントを最大限活用して、実際のイメージを伝えられる画面のレイアウトをSketchで作成', images: ['/images/projects/sitest-ui-components.jpg'] },
       { phase: '制作', title: 'プロトタイプの作成', description: '主要なタスクの開始から完了までの操作の流れをイメージできるプロトタイプをSketchで作成' },
       { phase: '制作', title: '実装の確認', description: 'Bitbucketを介して開発チームが実装したい内容や画面を確認して、承認または修正を依頼。セルフレビューにより「リリースタイミング」と「品質優先」に重きを置いて確認' },
       { phase: '制作', title: 'ヘルプページの作成', description: 'UIデザイン検討時に想定していた画面の要素やタスクの流れと、テクニカルライティングの流れを説明用のスクリーンショットの撮影とともに実施して、説明文と一致させる' },
@@ -115,13 +128,17 @@ export const projects: Project[] = [
       'サポート工数の削減を実現',
       '社内教育ツールとしても活用',
     ],
-    images: ['/images/projects/sitest-help-center.jpg', '/images/projects/sitest-help-structure.png', '/images/projects/sitest-help-pages.jpg'],
+    images: [
+      '/images/projects/sitest-help-center.jpg',
+      '/images/projects/sitest-help-structure.png',
+      '/images/projects/sitest-help-pages.jpg',
+    ],
     url: 'https://support.sitest.jp/hc/ja',
     process: [
       { phase: '企画', title: '気づき', description: 'UIをリニューアルしたにも関わらず、既存のヘルプページの網羅性・正確性が乏しく、「10ヒューリスティックス」の「10. ヘルプや説明文書を用意する」を満たせていなかった' },
       { phase: '企画', title: 'リサーチ', description: 'ライティングに着手する前に、カスタマーサポート担当者とセールス担当者に既にある内容を整理してもらい、「よくある質問」を洗い出させていただいた' },
-      { phase: '制作', title: 'サイトの構成', description: 'サービスの「利用前→利用中→利用後」の流れをベースに、画面とタスクの説明に必要なカテゴリーリストを作成して、サイト全体の構成を検討。最終的に約500ページに細分化' },
-      { phase: '制作', title: 'ライティング', description: 'テクニカルライティングの知見を生かして、既存のルールブック+αをベースにしたテンプレートを作成。開発チームから詳細な仕様をヒアリングして、利用における「ヒント」や「注意」を明文化' },
+      { phase: '制作', title: 'サイトの構成', description: 'サービスの「利用前→利用中→利用後」の流れをベースに、画面とタスクの説明に必要なカテゴリーリストを作成して、サイト全体の構成を検討。最終的に約500ページに細分化', images: ['/images/projects/img-115.png'] },
+      { phase: '制作', title: 'ライティング', description: 'テクニカルライティングの知見を生かして、既存のルールブック+αをベースにしたテンプレートを作成。開発チームから詳細な仕様をヒアリングして、利用における「ヒント」や「注意」を明文化', images: ['/images/projects/img-116.png'] },
       { phase: '制作', title: '内容のチェックと文字校正', description: '誤り漏れ防止のため、カスタマーサポート・セールス・エンジニアの担当者と協力して、ページごとの確かめ合わせを行い、誤った説明や誤字・数字がないか多角的にチェック' },
       { phase: '制作', title: 'カスタマーサポートツールの導入', description: 'ヘルプセンターとして公開するためのカスタマーサポートツールの選定を実施。カスタマーサポート担当者の要望を洗い手順要と、ヘルプへのカスタマイズ性を考慮してZendeskの導入を推進' },
       { phase: '評価', title: '公開後の効果と展開', description: 'ヘルプページへのアクセスが増加してユーザーに活用されたことで、サポートの工数が削減。社内教育ツールとして活用されたことで、カスタマーサポート担当者が裏取りが容易になった' },
@@ -179,7 +196,12 @@ export const projects: Project[] = [
       'アジャイルを意識した開発サイクルのリード',
       'デザインガイドラインによる一貫性の確保',
     ],
-    images: ['/images/projects/sitest-dashboard-renewal.jpg', '/images/projects/sitest-main.jpg', '/images/projects/sitest-reports.jpg'],
+    images: [
+      '/images/projects/sitest-dashboard-renewal.jpg',
+      '/images/projects/img-126.jpg',
+      '/images/projects/img-127.jpg',
+      '/images/projects/sitest-reports.jpg',
+    ],
     url: 'https://sitest.jp/',
     process: [
       { phase: '企画', title: 'スケジューリング', description: '社内で最も現行の製品を使用しているセールス側コンサルタントと、エンジニアのプロジェクトマネージャーと私の3人で打ち合わせ、開発に着手する優先順位を決定' },
@@ -211,13 +233,16 @@ export const projects: Project[] = [
       'レスポンシブではなくデバイスごとに最適化したUI',
       'KPT分析による継続的改善',
     ],
-    images: ['/images/projects/spaia-brand-logo.png', '/images/projects/spaia-tone-manner.png', '/images/projects/spaia-ui-desktop.png', '/images/projects/spaia-ui-mobile.png'],
+    images: [
+      '/images/projects/spaia-ui-desktop.png',
+      '/images/projects/spaia-ui-mobile.png',
+    ],
     url: 'https://spaia.jp/',
     process: [
-      { phase: '企画', title: 'ブランドロゴ・トーン&マナーの開発', description: 'スポーツメディアのブランディングとして、ロゴタイプとトーン&マナーを開発。スポーツの躍動感とデータの信頼性を表現' },
+      { phase: '企画', title: 'ブランドロゴ・トーン&マナーの開発', description: 'スポーツメディアのブランディングとして、ロゴタイプとトーン&マナーを開発。スポーツの躍動感とデータの信頼性を表現', images: ['/images/projects/spaia-brand-logo.png', '/images/projects/spaia-tone-manner.png'] },
       { phase: '制作', title: '画面設計', description: '大量の情報を視覚化する際に「情報がユーザーに伝えたいことは何か？」を常に問いながら、PC/スマートフォン/タブレットそれぞれに最適化したUIを設計' },
       { phase: '制作', title: 'デザインガイドライン作成', description: 'Sketch + Zeplinの導入を推進し、デザインと開発の連携を効率化。Frontifyでデザインガイドラインを管理' },
-      { phase: '制作', title: 'プロトタイプ作成', description: 'Prottを使用して画面遷移のプロトタイプを作成し、関係者との認識合わせを実施' },
+      { phase: '制作', title: 'プロトタイプ作成', description: 'Prottを使用して画面遷移のプロトタイプを作成し、関係者との認識合わせを実施', images: ['/images/projects/img-137.jpg'] },
       { phase: '評価', title: 'KPT分析による継続的改善', description: 'リリース後のKPT（Keep/Problem/Try）分析を実施して、継続的な改善サイクルを回す' },
     ],
   },
