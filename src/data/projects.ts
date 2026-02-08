@@ -61,7 +61,7 @@ export const projects: Project[] = [
       { phase: '企画', title: 'デザイントークンの制定', description: 'カラー、タイポグラフィ、シャドウ、スペーシングなどのデザイントークンをFigmaで制定し、エンジニアとの共通言語を確立', images: ['/images/projects/img-024.png'] },
       { phase: '制作', title: 'デザインライブラリの構築', description: 'FigmaでAtomicコンポーネントとスタイルガイドを構築。ZeplinとStorybookの連携でハンドオフを改善', images: ['/images/projects/fastest-design-system.jpg'] },
       { phase: '制作', title: '情報設計とワイヤーフレームの作成', description: 'セールス部門にヒアリングを実施して、実現したい要求と完了させたいタスクを整理。Whimsicalを使用してワイヤーフレームと画面遷移を作成', images: ['/images/projects/img-066.jpg'] },
-      { phase: '制作', title: 'UIデザインの作成', description: 'デザインライブラリのコンポーネントを使用して、実際のイメージをモックアップレベルで作成。状況に応じた画面の変更パターンを作成' },
+      { phase: '制作', title: 'UIデザインの作成', description: 'デザインライブラリのコンポーネントを使用して、実際のイメージをモックアップレベルで作成。状況に応じた画面の変更パターンを作成', images: ['/images/projects/img-008.jpg'] },
       { phase: '制作', title: 'プロトタイプの作成', description: '主要なタスクの開始から完了までの操作の流れをイメージできるプロトタイプをSketch/Figmaで作成', images: ['/images/projects/img-067.jpg'] },
       { phase: '制作', title: 'ヘルプマニュアルの制作', description: '実装と並行して、PDFのヘルプマニュアルを制作。モックアップと変わらない実装が実現されることで操作に矛盾がないことを確認', images: ['/images/projects/img-065.png', '/images/projects/img-049.jpg', '/images/projects/img-053.jpg'] },
       { phase: '制作', title: 'ランディングページの制作', description: 'Adobe XDでプロモーション用のランディングページを制作。Adobe After EffectsとLottieの連携によるモーショングラフィックの書き出しにも対応', images: ['/images/projects/img-016.jpg', '/images/projects/img-020.jpg'] },
