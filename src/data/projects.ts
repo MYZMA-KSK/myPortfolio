@@ -102,7 +102,7 @@ export const projects: Project[] = [
       { phase: '制作', title: '情報設計', description: 'ユーザーストーリーマップのカードから「オブジェクト」と「プロパティ」を抽出。OOUIを念頭に置いて画面のレイアウトや遷移の様子を検討', images: ['/images/projects/sitest-wireframes.jpg'] },
       { phase: '制作', title: 'ワイヤーフレームの作成', description: '複雑な画面を作成する場合は、画面を共有しながらWhimsicalを使用して、関係者とリアルタイムでワイヤーフレームを作成しながら合意形成を図る' },
       { phase: '制作', title: 'UIデザインの作成', description: 'UIリニューアル時に作成したデザインライブラリのコンポーネントを最大限活用して、実際のイメージを伝えられる画面のレイアウトをSketchで作成', images: ['/images/projects/sitest-ui-components.jpg'] },
-      { phase: '制作', title: 'プロトタイプの作成', description: '主要なタスクの開始から完了までの操作の流れをイメージできるプロトタイプをSketchで作成' },
+      { phase: '制作', title: 'プロトタイプの作成', description: '主要なタスクの開始から完了までの操作の流れをイメージできるプロトタイプをSketchで作成', images: ['/images/projects/img-123.jpg'] },
       { phase: '制作', title: '実装の確認', description: 'Bitbucketを介して開発チームが実装したい内容や画面を確認して、承認または修正を依頼。セルフレビューにより「リリースタイミング」と「品質優先」に重きを置いて確認' },
       { phase: '制作', title: 'ヘルプページの作成', description: 'UIデザイン検討時に想定していた画面の要素やタスクの流れと、テクニカルライティングの流れを説明用のスクリーンショットの撮影とともに実施して、説明文と一致させる' },
       { phase: '評価', title: '評価・効果検証', description: 'リソースや教育、リリースサイクルの問題から、今のところユーザビリティテストなどの評価を行えていないが、機能の利用数を計測して次回の企画や改善活動の優先付けに活用' },
