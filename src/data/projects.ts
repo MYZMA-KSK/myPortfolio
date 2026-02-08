@@ -166,7 +166,7 @@ export const projects: Project[] = [
       'プロトタイプを使用した簡易ユーザビリティテスト実施',
       '開発チームの作業負担削減を実現',
     ],
-    images: [],
+    images: ['/images/projects/sitest-main.jpg'],
     process: [
       { phase: '企画', title: '気づき', description: 'セールスチームと開発チームの日々の業務のチャットのやり取りを観察して、「ユーザーの新規アカウント開設」と「プラン変更の手続き」に開発チームの作業の負担が大きいことに気づいた' },
       { phase: '企画', title: 'リサーチ', description: '「ユーザーの新規アカウント開設」と「プラン変更の手続き」のワークフローについて、セールスチームメンバーにインタビューを実施して、ユーザーストーリーマップを作成', images: ['/images/projects/img-119.jpg'] },
