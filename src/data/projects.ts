@@ -242,7 +242,7 @@ export const projects: Project[] = [
     url: 'https://spaia.jp/',
     process: [
       { phase: '企画', title: 'ブランドロゴ・トーン&マナーの開発', description: 'スポーツメディアのブランディングとして、ロゴタイプとトーン&マナーを開発。スポーツの躍動感とデータの信頼性を表現', images: ['/images/projects/spaia-brand-logo.png', '/images/projects/spaia-tone-manner.png'] },
-      { phase: '制作', title: '画面設計', description: '大量の情報を視覚化する際に「情報がユーザーに伝えたいことは何か？」を常に問いながら、PC/スマートフォン/タブレットそれぞれに最適化したUIを設計' },
+      { phase: '制作', title: '画面設計', description: '大量の情報を視覚化する際に「情報がユーザーに伝えたいことは何か？」を常に問いながら、PC/スマートフォン/タブレットそれぞれに最適化したUIを設計', images: ['/images/projects/spaia-ui-desktop.png', '/images/projects/spaia-ui-mobile.png'] },
       { phase: '制作', title: 'デザインガイドライン作成', description: 'Sketch + Zeplinの導入を推進し、デザインと開発の連携を効率化。Frontifyでデザインガイドラインを管理' },
       { phase: '制作', title: 'プロトタイプ作成', description: 'Prottを使用して画面遷移のプロトタイプを作成し、関係者との認識合わせを実施', images: ['/images/projects/img-137.jpg'] },
       { phase: '評価', title: 'KPT分析による継続的改善', description: 'リリース後のKPT（Keep/Problem/Try）分析を実施して、継続的な改善サイクルを回す' },
