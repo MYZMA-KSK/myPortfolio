@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Montserrat, Noto_Sans_JP } from "next/font/google";
+import { Barlow, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PasswordGate from "@/components/PasswordGate";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <body
-        className={`${montserrat.variable} ${notoSansJP.variable} antialiased bg-neutral-50 text-neutral-900`}
+        className={`${barlow.variable} ${notoSansJP.variable} antialiased bg-neutral-50 text-neutral-900`}
         suppressHydrationWarning
       >
         <PasswordGate>

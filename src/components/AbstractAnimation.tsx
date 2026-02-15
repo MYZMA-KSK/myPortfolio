@@ -5,22 +5,50 @@ import { useState, useEffect } from 'react';
 
 const random = (min: number, max: number) => Math.random() * (max - min) + min;
 
-const generateRandomPath = () => {
-  const points = [];
-  const numPoints = Math.floor(random(4, 7));
-  for (let i = 0; i < numPoints; i++) {
-    points.push({
-      x: random(0, 1200),
-      y: random(0, 800),
-    });
+const generateOrthogonalPath = () => {
+  const startX = random(100, 1100);
+  const startY = random(100, 700);
+  const numSegments = Math.floor(random(4, 8));
+  let path = `M${startX},${startY}`;
+  let currentX = startX;
+  let currentY = startY;
+  const startHorizontal = Math.random() > 0.5;
+
+  for (let i = 0; i < numSegments; i++) {
+    const isHorizontal = startHorizontal ? i % 2 === 0 : i % 2 !== 0;
+    if (isHorizontal) {
+      const segLength = random(100, 450) * (Math.random() > 0.5 ? 1 : -1);
+      const newX = Math.max(0, Math.min(1200, currentX + segLength));
+      path += ` L${newX},${currentY}`;
+      currentX = newX;
+    } else {
+      const segLength = random(80, 350) * (Math.random() > 0.5 ? 1 : -1);
+      const newY = Math.max(0, Math.min(800, currentY + segLength));
+      path += ` L${currentX},${newY}`;
+      currentY = newY;
+    }
   }
-  return `M${points[0].x},${points[0].y} ${points.slice(1).map(p => `Q${random(0, 1200)},${random(0, 800)} ${p.x},${p.y}`).join(' ')}`;
+
+  return path;
 };
 
+interface PathElement {
+  d: string;
+  duration: number;
+  delay: number;
+  strokeWidth: number;
+  rotateX: number[];
+  rotateY: number[];
+  rotateZ: number[];
+  moveX: number[];
+  moveY: number[];
+  scale: number[];
+  offsetX: number;
+  offsetY: number;
+}
+
 interface RandomElements {
-  paths: { d: string; duration: number; delay: number; strokeWidth: number; z: number }[];
-  circles: { cx: number; cy: number; r: number; duration: number; delay: number; z: number; moveX: number; moveY: number }[];
-  dots: { cx: number; cy: number; r: number; duration: number; delay: number; z: number; moveX: number; moveY: number }[];
+  paths: PathElement[];
   planes: { x: number; y: number; width: number; height: number; duration: number; delay: number; moveX: number; moveY: number }[];
 }
 
@@ -30,33 +58,28 @@ export default function AbstractAnimation() {
   useEffect(() => {
     // クライアントサイドでのみランダム値を生成
     setElements({
-      paths: Array.from({ length: 6 }, () => ({
-        d: generateRandomPath(),
-        duration: random(12, 20),
-        delay: random(0, 3),
-        strokeWidth: random(0.5, 2),
-        z: random(-200, 200),
-      })),
-      circles: Array.from({ length: 10 }, () => ({
-        cx: random(400, 1100),
-        cy: random(100, 600),
-        r: random(40, 180),
-        duration: random(8, 16),
-        delay: random(0, 4),
-        z: random(-300, 300),
-        moveX: random(-60, 60),
-        moveY: random(-50, 50),
-      })),
-      dots: Array.from({ length: 20 }, () => ({
-        cx: random(300, 1150),
-        cy: random(50, 650),
-        r: random(2, 8),
-        duration: random(4, 10),
-        delay: random(0, 5),
-        z: random(-150, 150),
-        moveX: random(-100, 100),
-        moveY: random(-80, 80),
-      })),
+      paths: Array.from({ length: 10 }, () => {
+        const rx1 = random(-15, 15), rx2 = random(-20, 20), rx3 = random(-10, 10);
+        const ry1 = random(-20, 20), ry2 = random(-25, 25), ry3 = random(-15, 15);
+        const rz1 = random(-8, 8), rz2 = random(-12, 12);
+        const mx1 = random(-80, 80), mx2 = random(-60, 60);
+        const my1 = random(-60, 60), my2 = random(-40, 40);
+        const s1 = random(0.85, 1.15), s2 = random(0.9, 1.2);
+        return {
+          d: generateOrthogonalPath(),
+          duration: random(5, 16),
+          delay: random(0, 10),
+          strokeWidth: random(0.5, 2.5),
+          rotateX: [0, rx1, rx2, rx3, 0],
+          rotateY: [0, ry1, ry2, ry3, 0],
+          rotateZ: [0, rz1, rz2, 0],
+          moveX: [0, mx1, mx2, 0],
+          moveY: [0, my1, my2, 0],
+          scale: [1, s1, s2, 1],
+          offsetX: random(-10, 10),
+          offsetY: random(-10, 10),
+        };
+      }),
       planes: Array.from({ length: 4 }, () => ({
         x: random(500, 1000),
         y: random(100, 500),
@@ -77,177 +100,90 @@ export default function AbstractAnimation() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ perspective: '1000px' }}>
-      {/* 3D回転するコンテナ全体 */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ transformStyle: 'preserve-3d' }}
-        animate={{
-          rotateX: [0, 3, -2, 1, 0],
-          rotateY: [0, -4, 3, -2, 0],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 1200 800"
-          preserveAspectRatio="xMidYMid slice"
-          style={{ transformStyle: 'preserve-3d' }}
+      {/* 各パスが独立した3D空間で動く */}
+      {elements.paths.map((path, i) => (
+        <motion.div
+          key={`path-wrapper-${i}`}
+          className="absolute inset-0"
+          style={{
+            transformStyle: 'preserve-3d',
+            left: `${path.offsetX}%`,
+            top: `${path.offsetY}%`,
+          }}
+          animate={{
+            rotateX: path.rotateX,
+            rotateY: path.rotateY,
+            rotateZ: path.rotateZ,
+            x: path.moveX,
+            y: path.moveY,
+            scale: path.scale,
+          }}
+          transition={{
+            duration: path.duration * 1.5,
+            delay: path.delay,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
         >
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <motion.stop
-                offset="0%"
-                animate={{
-                  stopColor: [
-                    'rgba(0,0,0,0.03)',
-                    'rgba(80,80,80,0.12)',
-                    'rgba(40,40,40,0.06)',
-                    'rgba(0,0,0,0.03)',
-                  ],
-                }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <motion.stop
-                offset="100%"
-                animate={{
-                  stopColor: [
-                    'rgba(100,100,100,0.1)',
-                    'rgba(0,0,0,0.02)',
-                    'rgba(60,60,60,0.15)',
-                    'rgba(100,100,100,0.1)',
-                  ],
-                }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </linearGradient>
-
-            <linearGradient id="grad2" x1="100%" y1="0%" x2="0%" y2="100%">
-              <motion.stop
-                offset="0%"
-                animate={{
-                  stopColor: [
-                    'rgba(50,50,50,0.08)',
-                    'rgba(120,120,120,0.05)',
-                    'rgba(0,0,0,0.1)',
-                    'rgba(50,50,50,0.08)',
-                  ],
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <motion.stop
-                offset="100%"
-                animate={{
-                  stopColor: [
-                    'rgba(0,0,0,0.05)',
-                    'rgba(80,80,80,0.12)',
-                    'rgba(30,30,30,0.03)',
-                    'rgba(0,0,0,0.05)',
-                  ],
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </linearGradient>
-
-            <radialGradient id="radGrad" cx="50%" cy="50%" r="50%">
-              <motion.stop
-                offset="0%"
-                animate={{
-                  stopColor: [
-                    'rgba(0,0,0,0.1)',
-                    'rgba(60,60,60,0.15)',
-                    'rgba(0,0,0,0.1)',
-                  ],
-                }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-            </radialGradient>
-          </defs>
-
-          {/* 3D空間で動くパス */}
-          {elements.paths.map((path, i) => (
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 1200 800"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <defs>
+              <linearGradient id={`grad-${i}`} x1={i % 2 === 0 ? '0%' : '100%'} y1="0%" x2={i % 2 === 0 ? '100%' : '0%'} y2="100%">
+                <motion.stop
+                  offset="0%"
+                  animate={{
+                    stopColor: [
+                      `rgba(${Math.floor(random(0, 40))},${Math.floor(random(0, 40))},${Math.floor(random(0, 40))},0.04)`,
+                      `rgba(${Math.floor(random(60, 120))},${Math.floor(random(60, 120))},${Math.floor(random(60, 120))},0.14)`,
+                      `rgba(${Math.floor(random(20, 60))},${Math.floor(random(20, 60))},${Math.floor(random(20, 60))},0.06)`,
+                      `rgba(${Math.floor(random(0, 40))},${Math.floor(random(0, 40))},${Math.floor(random(0, 40))},0.04)`,
+                    ],
+                  }}
+                  transition={{ duration: random(6, 12), repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.stop
+                  offset="100%"
+                  animate={{
+                    stopColor: [
+                      `rgba(${Math.floor(random(60, 100))},${Math.floor(random(60, 100))},${Math.floor(random(60, 100))},0.1)`,
+                      `rgba(0,0,0,0.02)`,
+                      `rgba(${Math.floor(random(40, 80))},${Math.floor(random(40, 80))},${Math.floor(random(40, 80))},0.15)`,
+                      `rgba(${Math.floor(random(60, 100))},${Math.floor(random(60, 100))},${Math.floor(random(60, 100))},0.1)`,
+                    ],
+                  }}
+                  transition={{ duration: random(6, 12), repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </linearGradient>
+            </defs>
             <motion.path
-              key={`path-${i}`}
               d={path.d}
               fill="none"
-              stroke={i % 2 === 0 ? 'url(#grad1)' : 'url(#grad2)'}
+              stroke={`url(#grad-${i})`}
               strokeWidth={path.strokeWidth}
+              strokeLinecap="square"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{
                 pathLength: [0, 1, 1, 0],
-                opacity: [0, 0.7, 0.7, 0],
-              }}
-              style={{
-                transform: `translateZ(${path.z}px)`,
+                opacity: [0, 0.8, 0.8, 0],
               }}
               transition={{
                 duration: path.duration,
                 delay: path.delay,
                 repeat: Infinity,
-                ease: 'easeInOut',
+                times: [0, 0.4, 0.6, 1],
+                ease: [
+                  [0.55, 0.055, 0.675, 0.19],
+                  'linear',
+                  [0.55, 0.055, 0.675, 0.19],
+                ],
               }}
             />
-          ))}
-
-          {/* 3D回転する円 */}
-          {elements.circles.map((circle, i) => (
-            <motion.circle
-              key={`circle-${i}`}
-              cx={circle.cx}
-              cy={circle.cy}
-              r={circle.r}
-              fill="none"
-              stroke={i % 2 === 0 ? 'url(#grad1)' : 'url(#grad2)'}
-              strokeWidth={0.7}
-              animate={{
-                scale: [0.8, 1.2, 0.9, 1.1, 0.8],
-                opacity: [0.3, 0.7, 0.5, 0.8, 0.3],
-                cx: [circle.cx, circle.cx + circle.moveX, circle.cx + circle.moveX * 0.5, circle.cx],
-                cy: [circle.cy, circle.cy + circle.moveY, circle.cy + circle.moveY * 0.5, circle.cy],
-              }}
-              style={{
-                transform: `translateZ(${circle.z}px)`,
-              }}
-              transition={{
-                duration: circle.duration,
-                delay: circle.delay,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-
-          {/* 浮遊するドット */}
-          {elements.dots.map((dot, i) => (
-            <motion.circle
-              key={`dot-${i}`}
-              cx={dot.cx}
-              cy={dot.cy}
-              r={dot.r}
-              fill="url(#radGrad)"
-              animate={{
-                scale: [0.5, 1.5, 0.8, 1.2, 0.5],
-                opacity: [0.2, 0.9, 0.4, 0.7, 0.2],
-                cx: [dot.cx, dot.cx + dot.moveX, dot.cx + dot.moveX * 0.5, dot.cx],
-                cy: [dot.cy, dot.cy + dot.moveY, dot.cy + dot.moveY * 0.5, dot.cy],
-              }}
-              style={{
-                transform: `translateZ(${dot.z}px)`,
-              }}
-              transition={{
-                duration: dot.duration,
-                delay: dot.delay,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-        </svg>
-      </motion.div>
+          </svg>
+        </motion.div>
+      ))}
 
       {/* 独立して3D回転する平面要素 */}
       {elements.planes.map((plane, i) => (
@@ -278,56 +214,6 @@ export default function AbstractAnimation() {
           }}
         />
       ))}
-
-      {/* 浮遊する3D円形 */}
-      <motion.div
-        className="absolute rounded-full border border-neutral-300/15"
-        style={{
-          left: '60%',
-          top: '20%',
-          width: 200,
-          height: 200,
-          transformStyle: 'preserve-3d',
-        }}
-        animate={{
-          rotateX: [0, 180, 360],
-          rotateY: [0, -90, -180, -270, -360],
-          scale: [1, 1.2, 0.8, 1.1, 1],
-          x: [0, 30, -20, 10, 0],
-          y: [0, -40, 20, -10, 0],
-          opacity: [0.2, 0.4, 0.15, 0.35, 0.2],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-
-      <motion.div
-        className="absolute rounded-full border border-neutral-400/10"
-        style={{
-          left: '70%',
-          top: '40%',
-          width: 150,
-          height: 150,
-          transformStyle: 'preserve-3d',
-        }}
-        animate={{
-          rotateX: [0, -120, -240, -360],
-          rotateY: [0, 60, 120, 180, 240, 300, 360],
-          scale: [0.9, 1.15, 0.85, 1.05, 0.9],
-          x: [0, -40, 25, -15, 0],
-          y: [0, 30, -25, 15, 0],
-          opacity: [0.15, 0.35, 0.1, 0.3, 0.15],
-        }}
-        transition={{
-          duration: 20,
-          delay: 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
 
       {/* グラデーションオーバーレイも3D的に動く */}
       <motion.div

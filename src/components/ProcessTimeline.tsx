@@ -55,7 +55,7 @@ export default function ProcessTimeline({ steps }: ProcessTimelineProps) {
           {/* Steps */}
           <div className="relative pl-6">
             {/* Vertical Line */}
-            <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-neutral-200" />
+            <div className="absolute left-[9px] top-2 bottom-2 w-px bg-neutral-200" />
 
             <div className="space-y-6">
               {groupedSteps[phase].map((step, stepIndex) => (
@@ -68,11 +68,11 @@ export default function ProcessTimeline({ steps }: ProcessTimelineProps) {
                 >
                   {/* Dot */}
                   <div
-                    className={`absolute -left-6 top-1.5 w-[18px] h-[18px] rounded-full ${phaseDotColors[phase]} border-4 border-white shadow-sm`}
+                    className={`absolute -left-6 top-1.5 w-[18px] h-[18px] rounded-full ${phaseDotColors[phase]} border-4 border-white`}
                   />
 
                   {/* Content */}
-                  <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors">
+                  <div className="bg-white rounded-lg p-4">
                     <h4 className="font-bold text-neutral-900 mb-2">{step.title}</h4>
                     <p className="text-sm text-neutral-600 leading-relaxed">{step.description}</p>
                     {step.images && step.images.length > 0 && (

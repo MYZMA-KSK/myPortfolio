@@ -95,7 +95,7 @@ export default function ProjectDetailPage() {
                   src={project.images[0]}
                   alt={project.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
                   priority
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
@@ -109,11 +109,11 @@ export default function ProjectDetailPage() {
 
           {/* Awards */}
           {project.awards && project.awards.length > 0 && (
-            <div className="mb-12 p-6 bg-amber-50 border border-amber-200 rounded-lg">
-              <h2 className="font-semibold text-amber-800 mb-2">受賞歴</h2>
+            <div className="mb-12 p-6 bg-neutral-50 rounded-lg">
+              <h2 className="font-semibold text-neutral-900 mb-2">受賞歴</h2>
               <ul className="space-y-1">
                 {project.awards.map((award, index) => (
-                  <li key={index} className="text-amber-700">
+                  <li key={index} className="text-neutral-600">
                     {award}
                   </li>
                 ))}
@@ -205,7 +205,7 @@ export default function ProjectDetailPage() {
             <aside className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
                 {project.tools.length > 0 && (
-                  <div className="bg-white p-6 rounded-lg border border-neutral-200">
+                  <div className="bg-white p-6 rounded-lg">
                     <h3 className="font-semibold mb-4">使用ツール</h3>
                     <div className="flex flex-wrap gap-2">
                       {project.tools.map((tool) => (
@@ -221,7 +221,7 @@ export default function ProjectDetailPage() {
                 )}
 
                 {project.url && (
-                  <div className="bg-white p-6 rounded-lg border border-neutral-200">
+                  <div className="bg-white p-6 rounded-lg">
                     <h3 className="font-semibold mb-4">関連リンク</h3>
                     <a
                       href={project.url}

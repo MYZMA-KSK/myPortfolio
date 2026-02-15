@@ -218,14 +218,14 @@ export default function AboutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="bg-amber-50 border-amber-200">
+                  <Card>
                     <CardContent className="p-6">
                       <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <span className="text-2xl font-bold text-amber-600">{award.year}</span>
+                        <span className="text-2xl font-bold text-neutral-900">{award.year}</span>
                         <div>
-                          <h3 className="font-bold text-lg text-amber-900">{award.title}</h3>
-                          <p className="text-amber-800">{award.project}</p>
-                          <p className="text-amber-700 text-sm mt-1">{award.description}</p>
+                          <h3 className="font-bold text-lg text-neutral-900">{award.title}</h3>
+                          <p className="text-neutral-700">{award.project}</p>
+                          <p className="text-neutral-500 text-sm mt-1">{award.description}</p>
                         </div>
                       </div>
                     </CardContent>

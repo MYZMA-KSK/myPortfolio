@@ -28,7 +28,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                 src={project.images[0]}
                 alt={project.title}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">

@@ -46,7 +46,7 @@
 }
 
 body {
-  font-family: var(--font-montserrat), var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  font-family: var(--font-barlow), var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 }
 
 /* Smooth scrolling */
