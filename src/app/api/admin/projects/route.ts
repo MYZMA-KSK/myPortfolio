@@ -97,6 +97,7 @@ async function saveImages(projectId: string, imageUrls: string[]) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const slug = searchParams.get('slug')
+  const sort = searchParams.get('sort')
 
   if (slug) {
     const res = await fetch(
@@ -115,8 +116,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ project: { ...project, processSteps, images } })
   }
 
+  let orderClause = 'order=order_index.asc'
+  if (sort) {
+    if (sort === 'created_at_asc') {
+      orderClause = 'order=created_at.asc'
+    } else if (sort === 'created_at_desc') {
+      orderClause = 'order=created_at.desc'
+    } else if (sort === 'period_start_asc') {
+      orderClause = 'order=period_start.asc.nullsfirst'
+    } else if (sort === 'period_start_desc') {
+      orderClause = 'order=period_start.desc.nullslast'
+    }
+  }
+
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/projects?select=*,project_images(image_url,order_index)&order=order_index.asc`,
+    `${SUPABASE_URL}/rest/v1/projects?select=*,project_images(image_url,order_index)&${orderClause}`,
     { headers: supabaseHeaders() }
   )
   const data = await res.json()
@@ -141,7 +155,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { slug, title, subtitle, description, category, period, roles, tools, highlights, is_published, processSteps, images } = body
+  const { slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, images } = body
 
   if (!slug || !title || !category) {
     return NextResponse.json({ error: 'slug, title, category は必須です' }, { status: 400 })
@@ -161,6 +175,7 @@ export async function POST(request: NextRequest) {
       description: description || null,
       category,
       period: period || null,
+      period_start: period_start || null,
       roles: roles || [],
       tools: tools || [],
       highlights: highlights || [],
@@ -193,7 +208,7 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { id, slug, title, subtitle, description, category, period, roles, tools, highlights, is_published, processSteps, images } = body
+  const { id, slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, images } = body
 
   if (!id) return NextResponse.json({ error: 'id は必須です' }, { status: 400 })
 
@@ -206,6 +221,7 @@ export async function PUT(request: NextRequest) {
       description: description || null,
       category,
       period: period || null,
+      period_start: period_start || null,
       roles: roles || [],
       tools: tools || [],
       highlights: highlights || [],

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Edit2, Trash2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 
 type Project = {
   id: string
@@ -12,18 +12,28 @@ type Project = {
   category: 'web' | 'electronics'
   is_published: boolean
   thumbnail: string | null
+  created_at: string
+  period_start: string | null
 }
+
+type SortField = 'created_at' | 'period_start'
+type SortOrder = 'asc' | 'desc'
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [sortField, setSortField] = useState<SortField>('created_at')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+
+  useEffect(() => {
+    checkRole()
+  }, [])
 
   useEffect(() => {
     loadProjects()
-    checkRole()
-  }, [])
+  }, [sortField, sortOrder])
 
   async function checkRole() {
     const res = await fetch('/api/admin/role')
@@ -33,13 +43,24 @@ export default function AdminProjectsPage() {
 
   async function loadProjects() {
     try {
-      const res = await fetch('/api/admin/projects')
+      setIsLoading(true)
+      const sortParam = `${sortField}_${sortOrder}`
+      const res = await fetch(`/api/admin/projects?sort=${sortParam}`)
       const json = await res.json()
       setProjects(res.ok ? (json.projects || []) : [])
     } catch {
       setError('Failed to load projects')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  function handleSort(field: SortField) {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
     }
   }
 
@@ -96,6 +117,22 @@ export default function AdminProjectsPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 w-14" />
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500">タイトル</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500">カテゴリ</th>
+                <th className="px-4 py-3 text-left">
+                  <button onClick={() => handleSort('created_at')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
+                    作成日
+                    {sortField === 'created_at' && (
+                      <span>{sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}</span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left">
+                  <button onClick={() => handleSort('period_start')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
+                    期間開始日
+                    {sortField === 'period_start' && (
+                      <span>{sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}</span>
+                    )}
+                  </button>
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500">公開状態</th>
                 {isAdmin && (
                   <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500">操作</th>
@@ -123,6 +160,16 @@ export default function AdminProjectsPage() {
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs border border-neutral-200 text-neutral-600">
                       {project.category === 'web' ? 'Web' : 'Electronics'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs text-neutral-600">
+                      {new Date(project.created_at).toLocaleDateString('ja-JP')}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs text-neutral-600">
+                      {project.period_start ? new Date(project.period_start).toLocaleDateString('ja-JP') : '—'}
                     </span>
                   </td>
                   <td className="px-4 py-3">

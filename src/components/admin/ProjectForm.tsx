@@ -23,6 +23,7 @@ export interface ProjectFormData {
   description: string
   category: 'web' | 'electronics'
   period: string
+  period_start: string | null
   roles: string[]
   tools: string[]
   highlights: string[]
@@ -185,7 +186,7 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [form, setForm] = useState<ProjectFormData>(
     initialData ?? {
       slug: '', title: '', subtitle: '', description: '',
-      category: 'web', period: '', roles: [], tools: [], highlights: [], is_published: false,
+      category: 'web', period: '', period_start: null, roles: [], tools: [], highlights: [], is_published: false,
     }
   )
 
@@ -336,6 +337,12 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">期間</label>
               <input type="text" value={form.period} onChange={(e) => set('period', e.target.value)} placeholder="例: 2024年4月〜6月"
+                className="w-full h-10 px-3 rounded-md border border-neutral-200 text-neutral-900 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 transition-colors" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">期間の開始日（ソート用）</label>
+              <input type="date" value={form.period_start ?? ''} onChange={(e) => set('period_start', e.target.value || null)}
                 className="w-full h-10 px-3 rounded-md border border-neutral-200 text-neutral-900 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 transition-colors" />
             </div>
 
