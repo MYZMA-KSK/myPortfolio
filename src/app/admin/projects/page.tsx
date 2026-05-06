@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Plus, Edit2, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -13,11 +13,18 @@ type Project = {
   is_published: boolean
   thumbnail: string | null
   created_at: string
-  period_start: string | null
+  period: string | null
 }
 
-type SortField = 'created_at' | 'period_start'
+type SortField = 'created_at' | 'period'
 type SortOrder = 'asc' | 'desc'
+
+function extractPeriodStart(period: string | null): number {
+  if (!period) return 0
+  const match = period.match(/^(\d{4})年(?:(\d{1,2})月)?/)
+  if (!match) return 0
+  return parseInt(match[1]) * 100 + (match[2] ? parseInt(match[2]) : 0)
+}
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -28,12 +35,9 @@ export default function AdminProjectsPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
 
   useEffect(() => {
+    loadProjects()
     checkRole()
   }, [])
-
-  useEffect(() => {
-    loadProjects()
-  }, [sortField, sortOrder])
 
   async function checkRole() {
     const res = await fetch('/api/admin/role')
@@ -43,9 +47,7 @@ export default function AdminProjectsPage() {
 
   async function loadProjects() {
     try {
-      setIsLoading(true)
-      const sortParam = `${sortField}_${sortOrder}`
-      const res = await fetch(`/api/admin/projects?sort=${sortParam}`)
+      const res = await fetch('/api/admin/projects')
       const json = await res.json()
       setProjects(res.ok ? (json.projects || []) : [])
     } catch {
@@ -54,6 +56,18 @@ export default function AdminProjectsPage() {
       setIsLoading(false)
     }
   }
+
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => {
+      let cmp = 0
+      if (sortField === 'created_at') {
+        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      } else {
+        cmp = extractPeriodStart(a.period) - extractPeriodStart(b.period)
+      }
+      return sortOrder === 'asc' ? cmp : -cmp
+    })
+  }, [projects, sortField, sortOrder])
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -118,18 +132,18 @@ export default function AdminProjectsPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500">タイトル</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500">カテゴリ</th>
                 <th className="px-4 py-3 text-left">
-                  <button onClick={() => handleSort('created_at')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
-                    作成日
-                    {sortField === 'created_at' && (
-                      <span>{sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}</span>
+                  <button onClick={() => handleSort('period')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
+                    期間
+                    {sortField === 'period' && (
+                      sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
                     )}
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <button onClick={() => handleSort('period_start')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
-                    期間開始日
-                    {sortField === 'period_start' && (
-                      <span>{sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}</span>
+                  <button onClick={() => handleSort('created_at')} className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors">
+                    作成日
+                    {sortField === 'created_at' && (
+                      sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
                     )}
                   </button>
                 </th>
@@ -140,9 +154,8 @@ export default function AdminProjectsPage() {
               </tr>
             </thead>
             <tbody>
-              {projects.map((project) => (
+              {sortedProjects.map((project) => (
                 <tr key={project.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
-                  {/* Thumbnail */}
                   <td className="px-4 py-3">
                     <div className="w-12 h-8 rounded overflow-hidden bg-neutral-100 border border-neutral-200 flex-shrink-0">
                       {project.thumbnail ? (
@@ -163,13 +176,11 @@ export default function AdminProjectsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs text-neutral-600">
-                      {new Date(project.created_at).toLocaleDateString('ja-JP')}
-                    </span>
+                    <span className="text-xs text-neutral-600">{project.period || '—'}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs text-neutral-600">
-                      {project.period_start ? new Date(project.period_start).toLocaleDateString('ja-JP') : '—'}
+                      {new Date(project.created_at).toLocaleDateString('ja-JP')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
