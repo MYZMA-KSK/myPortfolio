@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Barlow, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PasswordGate from "@/components/PasswordGate";
+import RootLayoutClient from "@/components/RootLayoutClient";
 
 const barlow = Barlow({
   variable: "--font-barlow",
@@ -46,13 +44,9 @@ export default function RootLayout({
         className={`${barlow.variable} ${notoSansJP.variable} antialiased bg-neutral-50 text-neutral-900`}
         suppressHydrationWarning
       >
-        <PasswordGate>
-          <Header />
-          <main className="min-h-screen pt-16">
-            {children}
-          </main>
-          <Footer />
-        </PasswordGate>
+        <RootLayoutClient>
+          {children}
+        </RootLayoutClient>
       </body>
     </html>
   );
