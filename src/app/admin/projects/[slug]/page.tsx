@@ -29,6 +29,7 @@ export default function EditProjectPage() {
           description: d.description ?? '',
           category: d.category,
           period: d.period ?? '',
+          period_start: d.period_start ?? null,
           roles: d.roles ?? [],
           tools: d.tools ?? [],
           highlights: d.highlights ?? [],
