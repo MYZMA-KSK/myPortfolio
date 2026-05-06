@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS public.projects (
   description TEXT,
   category TEXT NOT NULL CHECK (category IN ('web', 'electronics')),
   period TEXT,
-  period_start DATE,
   roles TEXT[] DEFAULT ARRAY[]::TEXT[],
   tools TEXT[] DEFAULT ARRAY[]::TEXT[],
   highlights TEXT[] DEFAULT ARRAY[]::TEXT[],
