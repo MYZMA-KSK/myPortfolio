@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,40 +8,98 @@ import { motion } from 'framer-motion';
 import Container from '@/components/Container';
 import ProcessTimeline from '@/components/ProcessTimeline';
 import Lightbox from '@/components/Lightbox';
-import { projects, getProjectBySlug } from '@/data/projects';
+import { type ProcessPhase } from '@/data/projects';
+
+type ProcessStep = {
+  phase: ProcessPhase;
+  title: string;
+  description: string;
+};
+
+type ProjectDetail = {
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  category: 'web' | 'electronics';
+  period: string;
+  roles: string[];
+  tools: string[];
+  highlights: string[];
+  images: string[];
+  processSteps: ProcessStep[];
+  url?: string;
+  awards?: string[];
+};
+
+type ProjectSummary = {
+  slug: string;
+  title: string;
+};
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const project = getProjectBySlug(slug);
+
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [prevProject, setPrevProject] = useState<ProjectSummary | null>(null);
+  const [nextProject, setNextProject] = useState<ProjectSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  if (!project) {
-    notFound();
+  useEffect(() => {
+    async function load() {
+      const [detailRes, allRes] = await Promise.all([
+        fetch(`/api/projects?slug=${encodeURIComponent(slug)}`),
+        fetch('/api/projects'),
+      ]);
+
+      const [detailJson, allJson] = await Promise.all([
+        detailRes.json(),
+        allRes.json(),
+      ]);
+
+      if (!detailRes.ok || !detailJson.project) {
+        setIsNotFound(true);
+        setIsLoading(false);
+        return;
+      }
+
+      setProject(detailJson.project);
+
+      // API already returns projects sorted by period desc
+      const allProjects: ProjectSummary[] = allJson.projects ?? [];
+      const idx = allProjects.findIndex((p: ProjectSummary) => p.slug === slug);
+      setPrevProject(idx > 0 ? allProjects[idx - 1] : null);
+      setNextProject(idx < allProjects.length - 1 ? allProjects[idx + 1] : null);
+      setIsLoading(false);
+    }
+    load();
+  }, [slug]);
+
+  const openLightbox = (index: number) => { setLightboxIndex(index); setLightboxOpen(true); };
+  const closeLightbox = () => setLightboxOpen(false);
+  const goToPrev = () => setLightboxIndex((prev) => (prev === 0 ? (project?.images.length ?? 1) - 1 : prev - 1));
+  const goToNext = () => setLightboxIndex((prev) => (prev === (project?.images.length ?? 1) - 1 ? 0 : prev + 1));
+
+  if (isLoading) {
+    return (
+      <div className="py-16 md:py-24">
+        <Container>
+          <div className="flex items-center justify-center py-24">
+            <div className="w-5 h-5 border border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+          </div>
+        </Container>
+      </div>
+    );
   }
 
-  const projectIndex = projects.findIndex(p => p.slug === slug);
-  const prevProject = projectIndex > 0 ? projects[projectIndex - 1] : null;
-  const nextProject = projectIndex < projects.length - 1 ? projects[projectIndex + 1] : null;
-
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
-  };
-
-  const closeLightbox = () => {
-    setLightboxOpen(false);
-  };
-
-  const goToPrev = () => {
-    setLightboxIndex((prev) => (prev === 0 ? project.images.length - 1 : prev - 1));
-  };
-
-  const goToNext = () => {
-    setLightboxIndex((prev) => (prev === project.images.length - 1 ? 0 : prev + 1));
-  };
+  if (isNotFound || !project) {
+    notFound();
+  }
 
   return (
     <div className="py-16 md:py-24">
@@ -169,10 +227,10 @@ export default function ProjectDetailPage() {
               </section>
 
               {/* Process Timeline */}
-              {project.process && project.process.length > 0 && (
+              {project.processSteps && project.processSteps.length > 0 && (
                 <section className="mb-12">
                   <h2 className="text-xl font-bold mb-6">取り組みのプロセス</h2>
-                  <ProcessTimeline steps={project.process} />
+                  <ProcessTimeline steps={project.processSteps} />
                 </section>
               )}
 
