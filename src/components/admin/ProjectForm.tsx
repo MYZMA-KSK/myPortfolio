@@ -186,7 +186,7 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [form, setForm] = useState<ProjectFormData>(
     initialData ?? {
       slug: '', title: '', subtitle: '', description: '',
-      category: 'web', period: '', period_start: null, roles: [], tools: [], highlights: [], is_published: false,
+      category: 'web', period: `${new Date().getFullYear()}年〜`, period_start: null, roles: [], tools: [], highlights: [], is_published: false,
     }
   )
 
@@ -196,6 +196,20 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [monthStart, setMonthStart] = useState<number>(
     form.period_start ? new Date(form.period_start).getMonth() + 1 : new Date().getMonth() + 1
   )
+
+  // period フィールド用 State
+  const parsedPeriod = (() => {
+    const p = form.period
+    const yearMonth = p.match(/^(\d{4})年(\d{1,2})月〜$/)
+    if (yearMonth) return { type: 'year_month' as const, year: parseInt(yearMonth[1]), month: parseInt(yearMonth[2]) }
+    const yearOnly = p.match(/^(\d{4})年〜$/)
+    if (yearOnly) return { type: 'year_only' as const, year: parseInt(yearOnly[1]), month: 1 }
+    return null
+  })()
+
+  const [periodType, setPeriodType] = useState<'year_only' | 'year_month'>(parsedPeriod?.type ?? 'year_only')
+  const [periodYear, setPeriodYear] = useState<number>(parsedPeriod?.year ?? new Date().getFullYear())
+  const [periodMonth, setPeriodMonth] = useState<number>(parsedPeriod?.month ?? new Date().getMonth() + 1)
 
   const [images, setImages] = useState<string[]>(initialData?.images ?? [])
   const [processSteps, setProcessSteps] = useState<ProcessStep[]>(initialData?.processSteps ?? [])
@@ -215,6 +229,26 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
     setMonthStart(month)
     const dateStr = `${yearStart}-${String(month).padStart(2, '0')}-01`
     set('period_start', dateStr)
+  }
+
+  const buildPeriodText = (type: 'year_only' | 'year_month', year: number, month: number) => {
+    if (type === 'year_only') return `${year}年〜`
+    return `${year}年${month}月〜`
+  }
+
+  const handlePeriodTypeChange = (type: 'year_only' | 'year_month') => {
+    setPeriodType(type)
+    set('period', buildPeriodText(type, periodYear, periodMonth))
+  }
+
+  const handlePeriodYearChange = (year: number) => {
+    setPeriodYear(year)
+    set('period', buildPeriodText(periodType, year, periodMonth))
+  }
+
+  const handlePeriodMonthChange = (month: number) => {
+    setPeriodMonth(month)
+    set('period', buildPeriodText(periodType, periodYear, month))
   }
 
   const handleTitleChange = (title: string) => {
@@ -355,8 +389,38 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">期間</label>
-              <input type="text" value={form.period} onChange={(e) => set('period', e.target.value)} placeholder="例: 2024年4月〜6月"
-                className="w-full h-10 px-3 rounded-md border border-neutral-200 text-neutral-900 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 transition-colors" />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => handlePeriodTypeChange('year_only')}
+                    className={cn('flex-1 h-9 rounded-md border text-xs font-medium transition-colors',
+                      periodType === 'year_only' ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50')}>
+                    年のみ〜
+                  </button>
+                  <button type="button" onClick={() => handlePeriodTypeChange('year_month')}
+                    className={cn('flex-1 h-9 rounded-md border text-xs font-medium transition-colors',
+                      periodType === 'year_month' ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50')}>
+                    年月〜
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select value={periodYear} onChange={(e) => handlePeriodYearChange(Number(e.target.value))}
+                    className="flex-1 h-10 px-3 rounded-md border border-neutral-200 text-neutral-900 text-sm focus:outline-none focus:border-neutral-400 transition-colors">
+                    {Array.from({ length: 131 }, (_, i) => 1920 + i).map(year => (
+                      <option key={year} value={year}>{year}年</option>
+                    ))}
+                  </select>
+                  {periodType === 'year_month' && (
+                    <select value={periodMonth} onChange={(e) => handlePeriodMonthChange(Number(e.target.value))}
+                      className="flex-1 h-10 px-3 rounded-md border border-neutral-200 text-neutral-900 text-sm focus:outline-none focus:border-neutral-400 transition-colors">
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                        <option key={month} value={month}>{month}月</option>
+                      ))}
+                    </select>
+                  )}
+                  <span className="text-sm text-neutral-500 flex-shrink-0">〜</span>
+                </div>
+                <p className="text-xs text-neutral-400">プレビュー: {form.period || '未設定'}</p>
+              </div>
             </div>
 
             <div>
