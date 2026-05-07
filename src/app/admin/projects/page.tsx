@@ -74,7 +74,7 @@ export default function AdminProjectsPage() {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
       setSortField(field)
-      setSortOrder('asc')
+      setSortOrder('desc')
     }
   }
 
