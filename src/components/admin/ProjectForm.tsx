@@ -27,7 +27,8 @@ export interface ProjectFormData {
   tools: string[]
   highlights: string[]
   is_published: boolean
-  images?: string[]
+  mainImage?: string
+  galleryImages?: string[]
   processSteps?: ProcessStep[]
 }
 
@@ -36,53 +37,34 @@ interface ProjectFormProps {
   mode: 'create' | 'edit'
 }
 
-const KANA_TO_ROMAJI: Record<string, string> = {
-  'あ':'a','い':'i','う':'u','え':'e','お':'o',
-  'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
-  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
-  'た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
-  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
-  'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
-  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
-  'や':'ya','ゆ':'yu','よ':'yo',
-  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
-  'わ':'wa','を':'wo','ん':'n',
-  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
-  'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
-  'だ':'da','ぢ':'di','づ':'du','で':'de','ど':'do',
-  'ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
-  'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
-  'きゃ':'kya','きゅ':'kyu','きょ':'kyo',
-  'しゃ':'sha','しゅ':'shu','しょ':'sho',
-  'ちゃ':'cha','ちゅ':'chu','ちょ':'cho',
-  'にゃ':'nya','にゅ':'nyu','にょ':'nyo',
-  'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo',
-  'みゃ':'mya','みゅ':'myu','みょ':'myo',
-  'りゃ':'rya','りゅ':'ryu','りょ':'ryo',
-  'ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
-  'じゃ':'ja','じゅ':'ju','じょ':'jo',
-  'びゃ':'bya','びゅ':'byu','びょ':'byo',
-  'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo',
+const JAPANESE_SLUG_DICT: Record<string, string> = {
+  '管理': 'admin', '画面': 'screen', 'テスト': 'test',
+  'リニューアル': 'renewal', '実装': 'implementation', 'デザイン': 'design',
+  'UX': 'ux', 'UI': 'ui', 'リサーチ': 'research', 'ユーザー': 'user',
+  'インタフェース': 'interface', 'サイト': 'site', 'アプリ': 'app',
+  'システム': 'system', 'プラットフォーム': 'platform', 'ダッシュボード': 'dashboard',
+  'ポータル': 'portal', 'パネル': 'panel', '機能': 'feature',
+  'ツール': 'tool', 'プロジェクト': 'project', '開発': 'dev',
+  '制作': 'production', '企画': 'planning', '評価': 'evaluation',
+  '改善': 'improvement', '最適化': 'optimization', 'リファクタ': 'refactor',
+  'EC': 'ec', 'ショップ': 'shop', 'ストア': 'store', 'マーケット': 'market',
+  'トレーニング': 'training', 'コース': 'course', 'スクール': 'school',
+  'プログラム': 'program', 'イベント': 'event', 'セミナー': 'seminar',
+  'ワークショップ': 'workshop', 'ポートフォリオ': 'portfolio',
 }
 
 function generateSlug(title: string): string {
-  // カタカナをひらがなに変換
-  const hiragana = title.replace(/[ァ-ヶ]/g, (c) =>
-    String.fromCharCode(c.charCodeAt(0) - 0x60)
-  )
-  let romaji = ''
-  let i = 0
-  while (i < hiragana.length) {
-    const two = hiragana[i] + (hiragana[i + 1] ?? '')
-    if (KANA_TO_ROMAJI[two]) {
-      romaji += KANA_TO_ROMAJI[two]; i += 2
-    } else if (KANA_TO_ROMAJI[hiragana[i]]) {
-      romaji += KANA_TO_ROMAJI[hiragana[i]]; i++
-    } else {
-      romaji += /[a-zA-Z0-9]/.test(hiragana[i]) ? hiragana[i] : ' '; i++
-    }
+  let slug = title.toLowerCase()
+
+  // 辞書を使用してキーワードを置き換え（長いキーワード優先）
+  const sortedKeys = Object.keys(JAPANESE_SLUG_DICT).sort((a, b) => b.length - a.length)
+  for (const jpWord of sortedKeys) {
+    const regex = new RegExp(jpWord.toLowerCase(), 'g')
+    slug = slug.replace(regex, `-${JAPANESE_SLUG_DICT[jpWord]}-`)
   }
-  return romaji.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  // クリーンアップ
+  return slug.replace(/[^a-z0-9\-]+/g, '-').replace(/^-|-$/g, '').replace(/-+/g, '-')
 }
 
 const PHASES = ['企画', '制作', '評価'] as const
@@ -252,7 +234,14 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [periodYear, setPeriodYear] = useState<number>(parsedPeriod?.year ?? new Date().getFullYear())
   const [periodMonth, setPeriodMonth] = useState<number>(parsedPeriod?.month ?? new Date().getMonth() + 1)
 
-  const [images, setImages] = useState<string[]>(initialData?.images ?? [])
+  // initialData が古い images フォーマットを持つ場合、mainImage と galleryImages に分割
+  const initImages = (initialData as any)?.images
+  const [mainImage, setMainImage] = useState<string | undefined>(
+    initialData?.mainImage ?? (Array.isArray(initImages) && initImages.length > 0 ? initImages[0] : undefined)
+  )
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    initialData?.galleryImages ?? (Array.isArray(initImages) && initImages.length > 1 ? initImages.slice(1) : [])
+  )
   const [processSteps, setProcessSteps] = useState<ProcessStep[]>(initialData?.processSteps ?? [])
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [addingStep, setAddingStep] = useState(false)
@@ -299,7 +288,7 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const handleSubmit = async (publish?: boolean) => {
     setError(null)
     setIsSaving(true)
-    const payload = { ...form, is_published: publish !== undefined ? publish : form.is_published, images, processSteps }
+    const payload = { ...form, is_published: publish !== undefined ? publish : form.is_published, mainImage, galleryImages, processSteps }
 
     try {
       const res = await fetch('/api/admin/projects', {
@@ -370,10 +359,23 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">スラッグ <span className="text-red-500">*</span></label>
-              <div className="flex items-center">
-                <span className="flex items-center h-10 px-3 rounded-l-md border border-r-0 border-neutral-200 bg-neutral-50 text-sm text-neutral-400">/projects/</span>
-                <input type="text" value={form.slug} onChange={(e) => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="ec-renewal"
-                  className="flex-1 h-10 px-3 rounded-r-md border border-neutral-200 text-neutral-900 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 transition-colors" />
+              <div className="flex items-center gap-2">
+                <div className="flex items-center flex-1">
+                  <span className="flex items-center h-10 px-3 rounded-l-md border border-r-0 border-neutral-200 bg-neutral-50 text-sm text-neutral-400">/projects/</span>
+                  <input type="text" value={form.slug} onChange={(e) => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="ec-renewal"
+                    className="flex-1 h-10 px-3 rounded-r-md border border-neutral-200 text-neutral-900 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 transition-colors" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const generated = generateSlug(form.title)
+                    if (generated) set('slug', generated)
+                  }}
+                  disabled={!form.title.trim()}
+                  className="h-10 px-3 rounded-md border border-neutral-200 text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  生成
+                </button>
               </div>
             </div>
 
@@ -395,6 +397,108 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
             <TagInput label="担当ロール" values={form.roles} onChange={(v) => set('roles', v)} placeholder="例: UXデザイン、UIデザイン" />
             <TagInput label="使用ツール" values={form.tools} onChange={(v) => set('tools', v)} placeholder="例: Figma、React" />
             <TagInput label="ハイライト" values={form.highlights} onChange={(v) => set('highlights', v)} placeholder="例: ユーザーテスト実施" />
+          </div>
+
+          {/* Main Image */}
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
+            <h2 className="text-sm font-semibold text-neutral-900 mb-4">メイン画像</h2>
+            <p className="text-xs text-neutral-500 mb-3">プロジェクト詳細ページの最上部に表示される画像です</p>
+            {mainImage ? (
+              <div className="relative group w-full aspect-video rounded-md overflow-hidden border border-neutral-200 bg-neutral-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={mainImage} alt="" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setMainImage(undefined)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            ) : (
+              <ImageUploader
+                images={[]}
+                onChange={(imgs) => setMainImage(imgs[0])}
+                maxImages={1}
+              />
+            )}
+          </div>
+
+          {/* Gallery Images */}
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
+            <h2 className="text-sm font-semibold text-neutral-900 mb-4">ギャラリー</h2>
+            <p className="text-xs text-neutral-500 mb-3">プロジェクト詳細ページの下部に2列グリッドで表示される画像です（最大8枚）</p>
+            <ImageUploader
+              images={galleryImages}
+              onChange={setGalleryImages}
+              maxImages={8}
+            />
+          </div>
+
+          {/* Process Steps - same width as main */}
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-neutral-900">プロセス</h2>
+              {!addingStep && editingIndex === null && (
+                <button type="button" onClick={() => setAddingStep(true)}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-neutral-200 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                  ステップを追加
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {processSteps.length === 0 && !addingStep && (
+                <p className="text-sm text-neutral-400 py-6 text-center">プロセスステップがありません</p>
+              )}
+
+              {processSteps.map((step, i) =>
+                editingIndex === i ? (
+                  <ProcessStepForm key={i} initial={step} onSave={(s) => updateStep(i, s)} onCancel={() => setEditingIndex(null)} />
+                ) : (
+                  <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-md border border-neutral-100 hover:border-neutral-200 group transition-colors">
+                    <span className={cn('inline-flex items-center h-5 px-1.5 rounded text-xs font-medium border flex-shrink-0 mt-0.5', phaseStyle[step.phase])}>
+                      {step.phase}
+                    </span>
+                    {step.images?.[0] && (
+                      <div className="w-12 h-8 rounded overflow-hidden border border-neutral-200 flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={step.images[0]} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-900">{step.title}</p>
+                      {step.description && (
+                        <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{step.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <button type="button" onClick={() => moveStep(i, 'up')} disabled={i === 0}
+                        className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 transition-colors">
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button type="button" onClick={() => moveStep(i, 'down')} disabled={i === processSteps.length - 1}
+                        className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 transition-colors">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                      <button type="button" onClick={() => { setEditingIndex(i); setAddingStep(false) }}
+                        className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 transition-colors">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button type="button" onClick={() => deleteStep(i)}
+                        className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-red-600 hover:border-red-200 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {addingStep && (
+                <ProcessStepForm initial={{}} onSave={addStep} onCancel={() => setAddingStep(false)} />
+              )}
+            </div>
           </div>
         </div>
 
@@ -463,78 +567,6 @@ export function ProjectForm({ initialData, mode }: ProjectFormProps) {
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Images - full width */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-sm font-semibold text-neutral-900 mb-4">画像</h2>
-        <ImageUploader images={images} onChange={setImages} />
-      </div>
-
-      {/* Process Steps - full width */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-neutral-900">プロセス</h2>
-          {!addingStep && editingIndex === null && (
-            <button type="button" onClick={() => setAddingStep(true)}
-              className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-neutral-200 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
-              <Plus className="w-3.5 h-3.5" />
-              ステップを追加
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          {processSteps.length === 0 && !addingStep && (
-            <p className="text-sm text-neutral-400 py-6 text-center">プロセスステップがありません</p>
-          )}
-
-          {processSteps.map((step, i) =>
-            editingIndex === i ? (
-              <ProcessStepForm key={i} initial={step} onSave={(s) => updateStep(i, s)} onCancel={() => setEditingIndex(null)} />
-            ) : (
-              <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-md border border-neutral-100 hover:border-neutral-200 group transition-colors">
-                <span className={cn('inline-flex items-center h-5 px-1.5 rounded text-xs font-medium border flex-shrink-0 mt-0.5', phaseStyle[step.phase])}>
-                  {step.phase}
-                </span>
-                {step.images?.[0] && (
-                  <div className="w-12 h-8 rounded overflow-hidden border border-neutral-200 flex-shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={step.images[0]} alt="" className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-neutral-900">{step.title}</p>
-                  {step.description && (
-                    <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{step.description}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                  <button type="button" onClick={() => moveStep(i, 'up')} disabled={i === 0}
-                    className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 transition-colors">
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" onClick={() => moveStep(i, 'down')} disabled={i === processSteps.length - 1}
-                    className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 transition-colors">
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" onClick={() => { setEditingIndex(i); setAddingStep(false) }}
-                    className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 transition-colors">
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" onClick={() => deleteStep(i)}
-                    className="flex items-center justify-center w-7 h-7 rounded border border-neutral-200 text-neutral-400 hover:text-red-600 hover:border-red-200 transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )
-          )}
-
-          {addingStep && (
-            <ProcessStepForm initial={{}} onSave={addStep} onCancel={() => setAddingStep(false)} />
-          )}
         </div>
       </div>
     </div>

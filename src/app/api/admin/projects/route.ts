@@ -155,11 +155,18 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, images } = body
+  const { slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, mainImage, galleryImages, images } = body
 
   if (!slug || !title || !category) {
     return NextResponse.json({ error: 'slug, title, category は必須です' }, { status: 400 })
   }
+
+  // mainImage と galleryImages を images 配列に変換
+  const allImages = [
+    ...(mainImage ? [mainImage] : []),
+    ...(galleryImages ?? []),
+    ...(images ?? []), // 後方互換性のため、直接 images が送られた場合にも対応
+  ]
 
   const countRes = await fetch(`${SUPABASE_URL}/rest/v1/projects?select=id`, { headers: supabaseHeaders() })
   const existing = await countRes.json()
@@ -193,7 +200,7 @@ export async function POST(request: NextRequest) {
   const project = Array.isArray(data) ? data[0] : data
   await Promise.all([
     processSteps?.length ? saveProcessSteps(project.id, processSteps) : Promise.resolve(),
-    images?.length ? saveImages(project.id, images) : Promise.resolve(),
+    allImages.length ? saveImages(project.id, allImages) : Promise.resolve(),
   ])
 
   return NextResponse.json({ project }, { status: 201 })
@@ -208,7 +215,7 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { id, slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, images } = body
+  const { id, slug, title, subtitle, description, category, period, period_start, roles, tools, highlights, is_published, processSteps, mainImage, galleryImages, images } = body
 
   if (!id) return NextResponse.json({ error: 'id は必須です' }, { status: 400 })
 
@@ -236,9 +243,20 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: data.message || JSON.stringify(data) }, { status: res.status })
   }
 
+  // mainImage と galleryImages が送られた場合は、それを images 配列に変換
+  let imagesToSave: string[] | undefined
+  if (mainImage !== undefined || galleryImages !== undefined) {
+    imagesToSave = [
+      ...(mainImage ? [mainImage] : []),
+      ...(galleryImages ?? []),
+    ]
+  } else if (images !== undefined) {
+    imagesToSave = images
+  }
+
   await Promise.all([
     processSteps !== undefined ? saveProcessSteps(id, processSteps) : Promise.resolve(),
-    images !== undefined ? saveImages(id, images) : Promise.resolve(),
+    imagesToSave !== undefined ? saveImages(id, imagesToSave) : Promise.resolve(),
   ])
 
   return NextResponse.json({ project: Array.isArray(data) ? data[0] : data })

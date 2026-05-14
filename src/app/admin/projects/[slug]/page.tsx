@@ -21,6 +21,7 @@ export default function EditProjectPage() {
         setError('プロジェクトが見つかりません')
       } else {
         const d = json.project
+        const allImages: string[] = d.images ?? []
         setProject({
           id: d.id,
           slug: d.slug,
@@ -33,7 +34,8 @@ export default function EditProjectPage() {
           tools: d.tools ?? [],
           highlights: d.highlights ?? [],
           is_published: d.is_published,
-          images: d.images ?? [],
+          mainImage: allImages[0],
+          galleryImages: allImages.slice(1),
           processSteps: d.processSteps ?? [],
         })
       }
